@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>RecruiterBridge</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g:#1D9E75;--gd:#0F6E56;--gp:#085041;--gl:#E1F5EE;--gm:#9FE1CB;
+  --coral:#D85A30;--amber:#EF9F27;
+  --tx:#1a1a18;--mu:#6b6b67;--hi:#9b9b97;
+  --bg:#fafaf8;--sf:#f3f3ef;
+  --bd:rgba(30,30,20,0.12);--bdm:rgba(30,30,20,0.22);
+  --r:12px;--rs:8px;
+}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--tx);line-height:1.65;font-size:15px}
+.wrap{max-width:800px;margin:0 auto;padding:2rem 1.25rem 4rem}
+
+/* header */
+.hdr{text-align:center;margin-bottom:2rem}
+.logo{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:.5rem}
+.lm{width:40px;height:40px;background:var(--g);border-radius:9px;display:flex;align-items:center;justify-content:center}
+.lm svg{width:20px;height:20px}
+.ln{font-size:22px;font-weight:600;letter-spacing:-.3px}
+.lt{font-size:14px;color:var(--mu)}
+
+/* cards */
+.card{background:white;border:.5px solid var(--bdm);border-radius:var(--r);padding:20px;margin-bottom:1rem}
+.clabel{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--mu);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.snum{width:20px;height:20px;border-radius:50%;background:var(--g);color:white;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+textarea{width:100%;min-height:130px;padding:11px 13px;border:.5px solid var(--bdm);border-radius:var(--rs);font-family:inherit;font-size:14px;color:var(--tx);background:var(--sf);resize:vertical;outline:none;line-height:1.6;transition:border-color .2s}
+textarea:focus{border-color:var(--g);background:white}
+textarea::placeholder{color:var(--hi)}
+
+/* upload */
+.upz{border:1.5px dashed var(--bdm);border-radius:var(--rs);padding:24px 20px;text-align:center;cursor:pointer;background:var(--sf);position:relative;transition:all .18s}
+.upz:hover,.upz.drag{border-color:var(--g);background:var(--gl)}
+.upz input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upz-icon{font-size:26px;margin-bottom:6px}
+.upz-txt{font-size:14px;color:var(--mu)}
+.upz-hint{font-size:12px;color:var(--hi);margin-top:3px}
+
+.flist{display:flex;flex-direction:column;gap:5px;margin-top:8px}
+.fi{display:flex;align-items:center;gap:8px;background:white;border:.5px solid var(--bd);border-radius:var(--rs);padding:7px 11px;font-size:13px}
+.fd{width:8px;height:8px;border-radius:50%;flex-shrink:0;transition:background .3s}
+.fd.wait{background:var(--hi);animation:pulse .9s infinite}
+.fd.ok{background:var(--g)}
+.fd.bad{background:var(--coral)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+.fn{flex:1;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fs{font-size:11px;color:var(--hi);white-space:nowrap}
+.frm{color:var(--hi);cursor:pointer;font-size:17px;line-height:1;padding:0 2px}
+.frm:hover{color:var(--coral)}
+
+/* generate btn */
+.gbtn{width:100%;padding:14px;background:var(--g);color:white;border:none;border-radius:var(--r);font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;transition:background .18s;margin-top:.25rem}
+.gbtn:hover{background:var(--gd)}
+.gbtn:disabled{background:var(--sf);color:var(--hi);cursor:not-allowed;border:.5px solid var(--bd)}
+
+/* progress */
+.prog{background:white;border:.5px solid var(--bdm);border-radius:var(--r);padding:20px;margin-top:1rem}
+.pl{display:flex;justify-content:space-between;font-size:13px;color:var(--mu);margin-bottom:8px}
+.pb{height:5px;background:var(--sf);border-radius:3px;overflow:hidden;margin-bottom:6px}
+.pf{height:100%;background:var(--g);border-radius:3px;transition:width .4s ease}
+.plog{font-size:12px;color:var(--hi);min-height:15px}
+
+/* results */
+.rh{display:flex;align-items:baseline;justify-content:space-between;margin:2rem 0 .75rem}
+.rt{font-size:20px;font-weight:600}
+.rc{font-size:13px;color:var(--mu)}
+
+.cc{background:white;border:.5px solid var(--bd);border-radius:var(--r);margin-bottom:8px;overflow:hidden}
+.ch{display:flex;align-items:center;gap:11px;padding:13px 16px;cursor:pointer;transition:background .15s}
+.ch:hover{background:var(--sf)}
+.av{width:38px;height:38px;border-radius:50%;background:var(--gl);color:var(--gp);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0}
+.cm{flex:1;min-width:0}
+.cn{font-size:14px;font-weight:600}
+.ce{font-size:12px;color:var(--hi)}
+.pill{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;flex-shrink:0}
+.ph{background:var(--gl);color:var(--gp)}
+.pm{background:#FAEEDA;color:#633806}
+.pl2{background:#FAECE7;color:#4A1B0C}
+.pe{background:#f3f3ef;color:#6b6b67}
+.chv{color:var(--hi);font-size:12px;transition:transform .2s;flex-shrink:0}
+.chv.open{transform:rotate(180deg)}
+
+.cb{display:none;padding:16px;border-top:.5px solid var(--bd);background:var(--sf)}
+.cb.open{display:block}
+.fbg{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+@media(max-width:540px){.fbg{grid-template-columns:1fr}}
+.fbb{background:white;border:.5px solid var(--bd);border-radius:var(--rs);padding:13px}
+.fbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--hi);margin-bottom:5px}
+.fbt{font-size:13px;color:var(--mu);line-height:1.65}
+.fbr{background:white;border:.5px solid var(--bd);border-radius:var(--rs);padding:13px;margin-bottom:12px}
+.acts{display:flex;gap:7px;flex-wrap:wrap}
+.ab{padding:6px 14px;border:.5px solid var(--bdm);border-radius:var(--rs);font-size:12px;font-weight:500;background:white;color:var(--tx);cursor:pointer;transition:background .15s;font-family:inherit}
+.ab:hover{background:var(--sf)}
+.ab.p{background:var(--g);color:white;border-color:var(--g)}
+.ab.p:hover{background:var(--gd)}
+
+/* contact table */
+.csec{margin-top:2rem}
+.st{font-size:18px;font-weight:600;margin-bottom:.75rem}
+.ctbl{width:100%;border-collapse:collapse;background:white;border:.5px solid var(--bd);border-radius:var(--r);overflow:hidden;font-size:13px}
+.ctbl th{text-align:left;padding:9px 13px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--hi);border-bottom:.5px solid var(--bd);background:var(--sf)}
+.ctbl td{padding:10px 13px;border-bottom:.5px solid var(--bd);color:var(--tx);vertical-align:middle}
+.ctbl tr:last-child td{border-bottom:none}
+
+.ebar{display:flex;gap:8px;margin-top:1rem;flex-wrap:wrap}
+.eb{display:flex;align-items:center;gap:7px;padding:9px 16px;border:.5px solid var(--bdm);border-radius:var(--rs);font-size:13px;font-weight:500;background:white;color:var(--tx);cursor:pointer;transition:background .15s;font-family:inherit}
+.eb:hover{background:var(--sf)}
+.eb.g{background:var(--g);color:white;border-color:var(--g)}
+.eb.g:hover{background:var(--gd)}
+
+.err{background:#FCEBEB;border:.5px solid #F09595;border-radius:var(--rs);padding:11px 14px;font-size:13px;color:#501313;margin-top:10px}
+.note{background:var(--gl);border:.5px solid var(--gm);border-radius:var(--rs);padding:11px 14px;font-size:13px;color:var(--gp);margin-bottom:1rem;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="hdr">
+  <div class="logo">
+    <div class="lm"><svg viewBox="0 0 24 24" fill="none"><path d="M9 12l2 2 4-4M5 8h14M5 12h4M5 16h6" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <span class="ln">RecruiterBridge</span>
+  </div>
+  <div class="lt">Upload resumes + paste a job description → real AI feedback for every candidate</div>
+</div>
+
+<div class="note">
+  <strong>Tip:</strong> PDF and TXT files work best. Upload each candidate's resume, paste the job description, and click Generate. Each resume is analyzed individually against your exact JD.
+</div>
+
+<div class="card">
+  <div class="clabel"><div class="snum">1</div>Job description</div>
+  <textarea id="jd" placeholder="Paste the full job description — title, responsibilities, required skills, years of experience, tech stack, team size, etc. More detail = better feedback."></textarea>
+</div>
+
+<div class="card">
+  <div class="clabel"><div class="snum">2</div>Candidate resumes (up to 10)</div>
+  <div class="upz" id="dz">
+    <input type="file" id="fi" multiple accept=".pdf,.txt,.doc,.docx"/>
+    <div class="upz-icon">📄</div>
+    <div class="upz-txt">Drop resumes here or click to browse</div>
+    <div class="upz-hint">PDF · TXT · DOC · DOCX — max 10 files</div>
+  </div>
+  <div class="flist" id="flist"></div>
+  <div id="ferr" style="display:none" class="err"></div>
+</div>
+
+<button class="gbtn" id="gbtn" onclick="startGen()" disabled>Generate personalized feedback →</button>
+<div id="gerr" style="display:none" class="err"></div>
+
+<div class="prog" id="prog" style="display:none">
+  <div class="pl"><span id="ptxt">Starting...</span><span id="ppct">0%</span></div>
+  <div class="pb"><div class="pf" id="pf" style="width:0%"></div></div>
+  <div class="plog" id="plog"></div>
+</div>
+
+<div id="res" style="display:none">
+  <div class="rh"><div class="rt">Candidate Feedback</div><div class="rc" id="rcnt"></div></div>
+  <div id="clist"></div>
+  <div class="csec">
+    <div class="st">Contact & Send List</div>
+    <table class="ctbl">
+      <thead><tr><th>Name</th><th>Email</th><th>Score</th><th>Next Step</th></tr></thead>
+      <tbody id="ctb"></tbody>
+    </table>
+    <div class="ebar">
+      <button class="eb g" onclick="dlCSV()">⬇ Download CSV</button>
+      <button class="eb" onclick="copyAll()">⧉ Copy all feedback</button>
+      <button class="eb" onclick="reset()">↺ Start over</button>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+// PDF.js worker — must point to matching version
+if(typeof pdfjsLib !== 'undefined'){
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+
+let files = [];
+let texts = {}; // name -> string | false
+let results = [];
+
+// ── FILE INPUT ──────────────────────────────────────────────────
+const fi = document.getElementById('fi');
+fi.addEventListener('change', e => { addFiles(Array.from(e.target.files)); fi.value=''; });
+
+const dz = document.getElementById('dz');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
+dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag'); addFiles(Array.from(e.dataTransfer.files)); });
+
+function addFiles(newFiles) {
+  document.getElementById('ferr').style.display='none';
+  for(const f of newFiles){
+    if(files.length >= 10){ showFerr('Max 10 files.'); break; }
+    if(files.find(x => x.name===f.name)) continue;
+    files.push(f);
+    texts[f.name] = null;
+  }
+  renderFiles();
+  newFiles.forEach(f => { if(texts[f.name]===null) extractFile(f); });
+}
+
+function removeFile(i){
+  delete texts[files[i].name];
+  files.splice(i,1);
+  renderFiles();
+  checkReady();
+}
+
+function renderFiles(){
+  document.getElementById('flist').innerHTML = files.map((f,i) => {
+    const t = texts[f.name];
+    const state = t===null ? 'wait' : t===false ? 'bad' : 'ok';
+    const msg = t===null ? 'Reading...' : t===false ? 'Could not extract text' : t.length.toLocaleString()+' chars';
+    return `<div class="fi">
+      <div class="fd ${state}" id="dot${i}"></div>
+      <span class="fn">${f.name}</span>
+      <span class="fs" id="fst${i}">${msg}</span>
+      <span class="frm" onclick="removeFile(${i})">×</span>
+    </div>`;
+  }).join('');
+  checkReady();
+}
+
+function checkReady(){
+  const jd = document.getElementById('jd').value.trim();
+  const allDone = files.length > 0 && files.every(f => texts[f.name] !== null);
+  document.getElementById('gbtn').disabled = !(jd.length > 20 && allDone);
+}
+
+document.getElementById('jd').addEventListener('input', checkReady);
+
+// ── TEXT EXTRACTION ────────────────────────────────────────────
+async function extractFile(file){
+  const ext = file.name.split('.').pop().toLowerCase();
+  try{
+    let text = '';
+    if(ext === 'pdf'){
+      text = await extractPDF(file);
+    } else {
+      // txt, doc, docx — read as text
+      text = await new Promise((res,rej) => {
+        const r = new FileReader();
+        r.onload = e => res(e.target.result||'');
+        r.onerror = () => rej(new Error('Read failed'));
+        r.readAsText(file,'UTF-8');
+      });
+      // Strip obvious binary garbage from DOC files
+      text = text.replace(/[^\x09\x0A\x0D\x20-\x7E]/g,' ').replace(/\s{3,}/g,' ').trim();
+    }
+
+    if(!text || text.trim().length < 50){
+      texts[file.name] = false;
+      setDot(file.name, 'bad', 'No readable text — try saving as .txt');
+    } else {
+      texts[file.name] = text.trim();
+      setDot(file.name, 'ok', texts[file.name].length.toLocaleString()+' chars');
+    }
+  } catch(e){
+    texts[file.name] = false;
+    setDot(file.name, 'bad', 'Error: '+e.message);
+  }
+  checkReady();
+}
+
+async function extractPDF(file){
+  if(typeof pdfjsLib === 'undefined') throw new Error('PDF.js not loaded');
+  const buf = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({data: buf}).promise;
+  let out = '';
+  for(let p=1; p<=pdf.numPages; p++){
+    const page = await pdf.getPage(p);
+    const content = await page.getTextContent();
+    let lastY = null, line = '';
+    for(const item of content.items){
+      if(!('str' in item)) continue;
+      if(lastY !== null && Math.abs(item.transform[5] - lastY) > 4){
+        out += line.trim() + '\n';
+        line = '';
+      }
+      line += item.str + ' ';
+      lastY = item.transform[5];
+    }
+    if(line.trim()) out += line.trim() + '\n';
+    out += '\n';
+  }
+  return out;
+}
+
+function setDot(name, state, msg){
+  const i = files.findIndex(f => f.name===name);
+  if(i<0) return;
+  const d = document.getElementById('dot'+i);
+  const s = document.getElementById('fst'+i);
+  if(d) d.className = 'fd '+state;
+  if(s) s.textContent = msg;
+}
+
+// ── GENERATE ───────────────────────────────────────────────────
+async function startGen(){
+  const jd = document.getElementById('jd').value.trim();
+  results = [];
+  document.getElementById('gbtn').disabled = true;
+  document.getElementById('gerr').style.display = 'none';
+  document.getElementById('prog').style.display = 'block';
+  document.getElementById('res').style.display = 'none';
+
+  for(let i=0; i<files.length; i++){
+    const f = files[i];
+    const resumeText = texts[f.name];
+    setProg(Math.round(i/files.length*90), `Analyzing ${i+1}/${files.length}: ${f.name}`, 'Calling Claude API...');
+
+    if(!resumeText){
+      results.push({candidateName:f.name.replace(/\.[^.]+$/,''),email:'',score:0,scoreLabel:'Error',strengths:'File could not be read.',gaps:'No text extracted. Re-upload as a .txt file.',recommendation:'Cannot analyze.',fileName:f.name});
+      continue;
+    }
+
+    try{
+      const fb = await callClaude(jd, resumeText, f.name);
+      results.push({...fb, fileName:f.name});
+    } catch(e){
+      document.getElementById('gerr').textContent = `Error on ${f.name}: ${e.message}`;
+      document.getElementById('gerr').style.display = 'block';
+      results.push({candidateName:f.name.replace(/\.[^.]+$/,''),email:'',score:0,scoreLabel:'Error',strengths:'API call failed.',gaps:e.message,recommendation:'Try again.',fileName:f.name});
+    }
+
+    setProg(Math.round((i+1)/files.length*90), `Done: ${f.name}`, `${i+1} of ${files.length} complete`);
+  }
+
+  setProg(100,'All done!','');
+  setTimeout(()=>{
+    document.getElementById('prog').style.display='none';
+    renderResults();
+    document.getElementById('res').style.display='block';
+    document.getElementById('res').scrollIntoView({behavior:'smooth'});
+  }, 500);
+}
+
+async function callClaude(jd, resumeText, fileName){
+  const body = {
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 1000,
+    messages:[{
+      role:'user',
+      content:`You are a senior recruiter writing honest, specific, constructive feedback for a candidate.
+
+JOB DESCRIPTION:
+${jd}
+
+CANDIDATE RESUME (file: ${fileName}):
+${resumeText.substring(0, 5000)}
+
+Analyze this specific resume against this specific job description.
+Reply with ONLY a raw JSON object. No markdown. No backticks. No explanation. Just the JSON.
+
+{
+  "candidateName": "full name from resume, or filename without extension if not found",
+  "email": "email from resume, or empty string if not found",
+  "score": <integer 0-100>,
+  "scoreLabel": "<Strong Match | Good Match | Partial Match | Weak Match>",
+  "strengths": "2-4 sentences about specific strengths relevant to this job",
+  "gaps": "2-4 sentences about specific gaps vs this job description",
+  "recommendation": "1-2 sentences: advance to interview / phone screen / hold / decline + concrete reason"
+}`
+    }]
+  };
+
+  const resp = await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(body)
+  });
+
+  if(!resp.ok){
+    const e = await resp.json().catch(()=>({}));
+    throw new Error(e.error?.message || `HTTP ${resp.status}`);
+  }
+
+  const data = await resp.json();
+  let raw = data.content.map(b=>b.text||'').join('').trim();
+  raw = raw.replace(/^```json\s*/i,'').replace(/^```/,'').replace(/```$/,'').trim();
+
+  try{ return JSON.parse(raw); }
+  catch(e){
+    const m = raw.match(/\{[\s\S]*\}/);
+    if(m) return JSON.parse(m[0]);
+    throw new Error('Could not parse response as JSON');
+  }
+}
+
+// ── RENDER RESULTS ─────────────────────────────────────────────
+function renderResults(){
+  results.sort((a,b)=>b.score-a.score);
+  document.getElementById('rcnt').textContent = `${results.length} candidate${results.length!==1?'s':''} analyzed`;
+
+  document.getElementById('clist').innerHTML = results.map((r,i)=>{
+    const pc = r.score>=75?'ph':r.score>=50?'pm':r.score>0?'pl2':'pe';
+    const init = (r.candidateName||'??').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+    return `<div class="cc">
+      <div class="ch" onclick="tog(${i})">
+        <div class="av">${init}</div>
+        <div class="cm">
+          <div class="cn">${esc(r.candidateName||'Unknown')}</div>
+          <div class="ce">${esc(r.email||r.fileName)}</div>
+        </div>
+        <span class="pill ${pc}">${r.score}% · ${esc(r.scoreLabel)}</span>
+        <span class="chv" id="cv${i}">▾</span>
+      </div>
+      <div class="cb" id="bd${i}">
+        <div class="fbg">
+          <div class="fbb"><div class="fbl">Strengths</div><div class="fbt">${esc(r.strengths)}</div></div>
+          <div class="fbb"><div class="fbl">Gaps & considerations</div><div class="fbt">${esc(r.gaps)}</div></div>
+        </div>
+        <div class="fbr"><div class="fbl">Recruiter recommendation</div><div class="fbt">${esc(r.recommendation)}</div></div>
+        <div class="acts">
+          <button class="ab p" onclick="cpOne(${i})">⧉ Copy feedback</button>
+          <button class="ab" onclick="dlOne(${i})">⬇ Download .txt</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('ctb').innerHTML = results.map(r=>{
+    const pc = r.score>=75?'ph':r.score>=50?'pm':r.score>0?'pl2':'pe';
+    return `<tr>
+      <td style="font-weight:600">${esc(r.candidateName||'Unknown')}</td>
+      <td style="color:var(--hi)">${esc(r.email||'—')}</td>
+      <td><span class="pill ${pc}" style="display:inline-block">${r.score}%</span></td>
+      <td style="color:var(--mu);font-size:12px">${esc(r.recommendation.slice(0,80))}${r.recommendation.length>80?'…':''}</td>
+    </tr>`;
+  }).join('');
+}
+
+function tog(i){
+  document.getElementById('bd'+i).classList.toggle('open');
+  document.getElementById('cv'+i).classList.toggle('open');
+}
+
+// ── UTILS ──────────────────────────────────────────────────────
+function setProg(pct,lbl,log){
+  document.getElementById('pf').style.width=pct+'%';
+  document.getElementById('ppct').textContent=pct+'%';
+  document.getElementById('ptxt').textContent=lbl;
+  if(log) document.getElementById('plog').textContent=log;
+}
+
+function showFerr(m){
+  const e=document.getElementById('ferr');
+  e.textContent=m; e.style.display='block';
+}
+
+function esc(s){
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function fmt(r){
+  return [
+    'CANDIDATE FEEDBACK REPORT',
+    '='.repeat(26),
+    `Name:   ${r.candidateName}`,
+    `Email:  ${r.email||'N/A'}`,
+    `File:   ${r.fileName}`,
+    `Score:  ${r.score}% — ${r.scoreLabel}`,
+    '',
+    'STRENGTHS',
+    r.strengths,
+    '',
+    'GAPS & CONSIDERATIONS',
+    r.gaps,
+    '',
+    'RECOMMENDATION',
+    r.recommendation,
+    ''
+  ].join('\n');
+}
+
+function cpOne(i){ navigator.clipboard.writeText(fmt(results[i])).then(()=>alert('Copied!')); }
+
+function dlOne(i){
+  const r=results[i];
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([fmt(r)],{type:'text/plain'}));
+  a.download=`feedback-${(r.candidateName||r.fileName).replace(/\s+/g,'-')}.txt`;
+  a.click();
+}
+
+function copyAll(){
+  navigator.clipboard.writeText(results.map(fmt).join('\n'+'─'.repeat(40)+'\n\n'))
+    .then(()=>alert('All feedback copied!'));
+}
+
+function dlCSV(){
+  const hdr='Name,Email,File,Score,Score Label,Recommendation';
+  const rows=results.map(r=>
+    [r.candidateName,r.email,r.fileName,r.score,r.scoreLabel,r.recommendation]
+    .map(v=>`"${(v||'').replace(/"/g,'""')}"`)
+    .join(',')
+  );
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([[hdr,...rows].join('\n')],{type:'text/csv'}));
+  a.download='recruiterbridge-contacts.csv';
+  a.click();
+}
+
+function reset(){
+  if(!confirm('Clear everything and start over?')) return;
+  files=[]; texts={}; results=[];
+  document.getElementById('flist').innerHTML='';
+  document.getElementById('jd').value='';
+  ['res','prog','gerr','ferr'].forEach(id=>document.getElementById(id).style.display='none');
+  document.getElementById('gbtn').disabled=true;
+}
+</script>
+</body>
+</html>
