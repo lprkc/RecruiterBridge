@@ -19,6 +19,8 @@ Instead of generic keyword-matching ATS tools, RecruiterBridge analyzes each res
 - **⚡ Simple Workflow** — Three steps: paste JD → upload resumes → generate feedback.
 
 ## 🚀 Getting Started
+Web Based Version
+https://lprkc.github.io/RecruiterBridge/
 
 ### Prerequisites
 
